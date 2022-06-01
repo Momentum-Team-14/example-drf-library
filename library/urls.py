@@ -36,6 +36,8 @@ handler400 = "rest_framework.exceptions.bad_request"
 urlpatterns = [
     path("api/", include(router.urls)),
     path("api/", include(books_router.urls)),
+    path("api/auth/", include("djoser.urls")),
+    path("api/auth/", include("djoser.urls.authtoken")),
     path(
         "api/books/<int:book_pk>/reviews",
         api_views.BookReviewListCreateView.as_view(),
