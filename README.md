@@ -273,3 +273,44 @@ POST api/books/{id}/reviews
 }
 
 ```
+
+## Create a reading record for a book
+
+Requires authentication.
+
+Choices for "reading_state" are:
+
+- "wr" (want to read)
+- "rg" (reading)
+- "rd" (read)
+
+### request
+
+```
+POST api/books/{id}/book_records
+
+ {
+  "reading_state": "wr"
+ }
+
+```
+
+### response
+
+```
+201 Created
+
+{
+  "pk": 15,
+  "book": {
+    "pk": 2,
+    "title": "The Anatomy of Melancholy",
+    "author": "Robert Burton",
+    "publication_year": 1621,
+    "featured": false
+  },
+  "reader": "admin",
+  "reading_state": "rd"
+}
+
+```
