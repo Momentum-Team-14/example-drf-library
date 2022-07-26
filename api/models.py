@@ -23,6 +23,7 @@ class Book(models.Model):
     featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    favorited_by = models.ManyToManyField(User, related_name="favorite_books")
 
     class Meta:
         constraints = [
@@ -34,6 +35,9 @@ class Book(models.Model):
 
     def __str__(self):
         return f"{self.title} by {self.author}"
+
+    def favorite_count(self):
+        return self.favorited_by.count()
 
 
 class BookRecord(models.Model):

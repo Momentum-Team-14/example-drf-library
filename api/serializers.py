@@ -10,20 +10,40 @@ class UserCreateSerializer(serializers.ModelSerializer):
         fields = ("username", "email", "password")
 
 
+class FavoriteSerializer(serializers.Serializer):
+    class Meta:
+        fields = "favorited_by"
+
+
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ("pk", "title", "author", "publication_year", "featured")
+        fields = (
+            "pk",
+            "title",
+            "author",
+            "publication_year",
+            "featured",
+            "favorite_count",
+        )
 
 
 class BookDetailSerializer(serializers.ModelSerializer):
     reviews = serializers.HyperlinkedRelatedField(
-        many=True, read_only=True, view_name="book_reviews-detail"
+        many=True, read_only=True, view_name="book_review_detail"
     )
 
     class Meta:
         model = Book
-        fields = ("pk", "title", "author", "publication_year", "featured", "reviews")
+        fields = (
+            "pk",
+            "title",
+            "author",
+            "publication_year",
+            "featured",
+            "reviews",
+            "favorite_count",
+        )
 
 
 class BookRecordSerializer(serializers.ModelSerializer):

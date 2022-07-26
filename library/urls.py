@@ -43,5 +43,15 @@ urlpatterns = [
         api_views.BookReviewListCreateView.as_view(),
         name="book_reviews",
     ),
+    path(
+        "api/book-reviews/<int:pk>",
+        api_views.BookReviewDetailView.as_view(),
+        name="book_review_detail",
+    ),
+    path(
+        "api/books/<int:book_pk>/favorites",
+        api_views.CreateFavoriteView.as_view(),
+        name="favorite_books",
+    ),
     path("admin/", admin.site.urls),
 ]
