@@ -13,6 +13,7 @@ django-on-heroku = "*"
 drf-nested-routers = "*"
 gunicorn = "*"
 djoser = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 black = "*"
