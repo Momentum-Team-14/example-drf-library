@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import django_on_heroku
 import environ
+from corsheaders.defaults import default_headers
 
 env = environ.Env(
     # set casting, default value
@@ -125,14 +127,15 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
+# https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# media files
+# uploaded files -- this is different from static files
+# https://docs.djangoproject.com/en/4.0/topics/files/
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -142,8 +145,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "api.User"
-
-import django_on_heroku
 
 django_on_heroku.settings(locals())
 del DATABASES["default"]["OPTIONS"]["sslmode"]
@@ -157,4 +158,34 @@ REST_FRAMEWORK = {
     ),
 }
 
+# for django-cors-headers
 CORS_ALLOW_ALL_ORIGINS = True
+
+# to allow file uploads
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'content-disposition',
+]
+
+# set this variable in your .env file.
+# You usually want it set to false in dev and true in prod,
+# but you can toggle it in dev so you can test your AWS bucket
+if env('USE_S3'):
+    # These are necessary for AWS.
+    # Make sure these are set on Heroku as well
+    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+
+    # These are optional
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
+
+    # This is for django-storages with boto3, which is a Python SDK for S3 provided by AWS
+    # You need to have django-storages in your dependencies
+    # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
