@@ -14,6 +14,7 @@ drf-nested-routers = "*"
 gunicorn = "*"
 djoser = "*"
 django-cors-headers = "*"
+pillow = "*"
 
 [dev-packages]
 black = "*"

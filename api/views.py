@@ -2,6 +2,7 @@ from django.db import IntegrityError
 from django.views.defaults import bad_request
 from psycopg2.errors import UniqueViolation
 from rest_framework import status
+from rest_framework.parsers import JSONParser, FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.views import APIView
@@ -33,6 +34,7 @@ class BookViewSet(ModelViewSet):
     queryset = Book.objects.all().order_by("title")
     serializer_class = BookDetailSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+    parser_classes = [JSONParser, FileUploadParser]
 
     def get_serializer_class(self):
         if self.action in ["list"]:

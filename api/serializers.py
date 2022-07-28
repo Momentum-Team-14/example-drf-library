@@ -32,6 +32,7 @@ class BookDetailSerializer(serializers.ModelSerializer):
     reviews = serializers.HyperlinkedRelatedField(
         many=True, read_only=True, view_name="book_review_detail"
     )
+    title_page = serializers.ImageField()
 
     class Meta:
         model = Book
@@ -43,7 +44,17 @@ class BookDetailSerializer(serializers.ModelSerializer):
             "featured",
             "reviews",
             "favorite_count",
+            "title_page"
         )
+
+
+    def update(self, instance, validated_data):
+      if "file" in self.initial_data:
+            file = self.initial_data.get("file")
+            instance.title_page.save(file.name, file, save=True)
+            return instance
+      # this call to super is to make sure that update still works for other fields
+      return super().update(instance, validated_data)
 
 
 class BookRecordSerializer(serializers.ModelSerializer):
