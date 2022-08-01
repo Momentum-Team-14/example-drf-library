@@ -31,7 +31,6 @@ from django.db.models import Count
 
 
 class BookViewSet(ModelViewSet):
-    queryset = Book.objects.all().order_by("title")
     serializer_class = BookDetailSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
     parser_classes = [JSONParser, FileUploadParser]
@@ -61,6 +60,20 @@ class BookViewSet(ModelViewSet):
                 "error": "Unique constraint violation: there is already a book with this title by this author."
             }
             return Response(error_data, status=400)
+
+    def get_queryset(self):
+      # we want this to work for requests that don't include a search term as well
+      queryset = Book.objects.all().order_by("title")
+      # handle the case where we have query params that include a "search" key
+      # if there are no search terms that match "search" this will be None
+      search_term = self.request.query_params.get("search")
+      if search_term is not None:
+        # filter using the search term
+        queryset = Book.objects.filter(title__icontains=search_term).order_by("title")
+
+      return queryset
+
+
 
 
 class BookRecordViewSet(ModelViewSet):
