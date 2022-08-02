@@ -54,5 +54,6 @@ urlpatterns = [
         api_views.CreateFavoriteView.as_view(),
         name="favorite_books",
     ),
+    path("api/book-reviews/search", api_views.BookReviewSearchView.as_view(), name="book_review_search"),
     path("admin/", admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

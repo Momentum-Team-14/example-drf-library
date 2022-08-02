@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.generics import (
+    ListAPIView,
     ListCreateAPIView,
     RetrieveDestroyAPIView,
     get_object_or_404,
@@ -33,12 +34,16 @@ from django.db.models import Count
 class BookViewSet(ModelViewSet):
     serializer_class = BookDetailSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
-    parser_classes = [JSONParser, FileUploadParser]
 
     def get_serializer_class(self):
         if self.action in ["list"]:
             return BookSerializer
         return super().get_serializer_class()
+
+    def get_parsers(self):
+        if self.request.FILES:
+            self.parser_classes.append(FileUploadParser)
+        return [parser() for parser in self.parser_classes]
 
     @action(detail=False)
     def featured(self, request):
@@ -59,21 +64,21 @@ class BookViewSet(ModelViewSet):
             error_data = {
                 "error": "Unique constraint violation: there is already a book with this title by this author."
             }
-            return Response(error_data, status=400)
+            return Response(error_data, status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
-      # we want this to work for requests that don't include a search term as well
-      queryset = Book.objects.all().order_by("title")
-      # handle the case where we have query params that include a "search" key
-      # if there are no search terms that match "search" this will be None
-      search_term = self.request.query_params.get("search")
-      if search_term is not None:
-        # filter using the search term
-        queryset = Book.objects.filter(title__icontains=search_term).order_by("title")
+        # we want this to work for requests that don't include a search term as well
+        queryset = Book.objects.all().order_by("title")
+        # handle the case where we have query params that include a "search" key
+        # if there are no search terms that match "search" this will be None
+        search_term = self.request.query_params.get("search")
+        if search_term is not None:
+            # filter using the search term
+            queryset = Book.objects.filter(title__icontains=search_term).order_by(
+                "title"
+            )
 
-      return queryset
-
-
+        return queryset
 
 
 class BookRecordViewSet(ModelViewSet):
@@ -104,7 +109,9 @@ class BookReviewListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return BookReview.objects.filter(book_id=self.kwargs["book_pk"])
+        queryset = BookReview.objects.filter(book_id=self.kwargs["book_pk"])
+
+        return queryset
 
     def perform_create(self, serializer, **kwargs):
         book = get_object_or_404(Book, pk=self.kwargs["book_pk"])
@@ -136,3 +143,14 @@ class CreateFavoriteView(APIView):
         serializer = BookDetailSerializer(book, context={"request": request})
         # return a response
         return Response(serializer.data, status=201)
+
+
+class BookReviewSearchView(ListAPIView):
+    serializer_class = BookReviewSerializer
+    search_term = ""
+
+    def get_queryset(self):
+        search_term = self.request.query_params.get("search") or self.search_term
+        # this is using the search method for postgres full-text search
+        # https://docs.djangoproject.com/en/4.0/ref/contrib/postgres/search/#the-search-lookup
+        return BookReview.objects.filter(body__search=search_term)

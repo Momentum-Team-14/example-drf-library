@@ -18,7 +18,7 @@ from corsheaders.defaults import default_headers
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
-    USE_EMAIL=(bool, False),
+    USE_S3=(bool, False),
 )
 environ.Env.read_env()
 
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "django_extensions",
     "corsheaders",
     "rest_framework",

@@ -24,7 +24,7 @@ class Book(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     favorited_by = models.ManyToManyField(User, related_name="favorite_books")
-    title_page= models.ImageField(upload_to="title_pages", null=True, blank=True)
+    title_page = models.ImageField(upload_to="title_pages", null=True, blank=True)
 
     class Meta:
         constraints = [
